@@ -105,7 +105,7 @@ router.patch("/logo-user", authRequired, async (req: Request, res: Response) => 
 
 
 //ELIMINAR LA IMAGEN DE PERFIL DEL USER
-router.patch("/delete-logo-user", authRequired, async (req: Request, res: Response) => {
+router.patch("/delete-logo", authRequired, async (req: Request, res: Response) => {
     try {
         const { id } = req.user;
         const serviceLayerResponse = await patchDeleteLogoUserService(id);
@@ -114,7 +114,7 @@ router.patch("/delete-logo-user", authRequired, async (req: Request, res: Respon
         const errorController = error as ServiceError;
         res.status(errorController.code).json(errorController.message);
     }
-});  // PATCH - http://localhost:3000/api/user/delete-logo-user con { "logo": "" }
+});  // PATCH - http://localhost:3000/api/user/delete-logo con { "logo": "" }
 
 
 

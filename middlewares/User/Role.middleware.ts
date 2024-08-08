@@ -70,7 +70,6 @@ export const checkRoleArray = (req: Request, res: Response, next: NextFunction) 
     if (!user) return res.status(401).json({ error: 'Usuario no autenticado' });
     const { typeRole } = user;
     if (typeRole === 'Superadmin') {
-        console.log('Pasa')
         return next();
     } else if (typeRole === 'Administrador') {
         if (Array.isArray(req.body)) {

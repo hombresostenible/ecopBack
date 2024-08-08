@@ -39,7 +39,6 @@ router.post("/", authRequired, checkRole, validateSchema(rawMaterialSchema), asy
 router.post("/create-many", authRequired, checkRoleArray, validateSchema(manyRawMaterialSchema), async (req: Request, res: Response) => {
     try {
         const bodyArray = req.body;
-        console.log('bodyArray: ', bodyArray)
         const { id, typeRole } = req.user;
         const serviceLayerResponse = await postManyRawMaterialService(bodyArray, id, typeRole);
         res.status(serviceLayerResponse.code).json(serviceLayerResponse);

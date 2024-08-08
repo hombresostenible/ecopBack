@@ -26,8 +26,8 @@ class Server {
         try {
             await db.authenticate();
             console.log('Base de datos conectada');
-            // await db.sync();
-            await db.sync({ force: true }); // En producción, puedes usar `await db.sync();` en lugar de `{ force: true }`,Esto elimina y recrea las tablas en cada reinicio
+            await db.sync();
+            // await db.sync({ force: true }); // En producción, puedes usar `await db.sync();` en lugar de `{ force: true }`,Esto elimina y recrea las tablas en cada reinicio
             console.log('Modelos sincronizados con la base de datos');
         } catch (error) {
             console.error('Error al conectar la base de datos:', error);

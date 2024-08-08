@@ -6,6 +6,8 @@ import {
     mailUserWelcome,
     mailUpdateUserProfile,
 } from '../../libs/nodemailer';
+import { extractPublicIdFromUrlCloudinaryProfiles } from '../../helpers/Cloudinary/cloudinary.helper';
+import cloudinary from '../../helpers/Cloudinary/cloudinary.helper';
 import { IUser } from '../../types/User/users.types';
 import { ServiceError } from '../../types/Responses/responses.types';
 
@@ -40,7 +42,6 @@ export const postRegisterUserData = async (body: IUser): Promise<User | null> =>
             corporateName: body.corporateName,
             typeDocumentId: body.typeDocumentId,
             documentId: body.documentId,
-            // verificationDigit: body.verificationDigit,
             commercialName: body.commercialName,
             logo: body.logo,
             typeRole: body.typeRole,
@@ -70,7 +71,6 @@ export const postRegisterUserData = async (body: IUser): Promise<User | null> =>
             throw new ServiceError(500, 'Error al enviar el correo electrónico de bienvenida');
         }
     } catch (error) {
-        console.log('Error: ', error)
         await t.rollback();
         throw new ServiceError(500, `${error}`);
     }
@@ -148,13 +148,11 @@ export const patchLogoUserData = async (idUser: string, body: Partial<IUser>): P
             where: { id: idUser },
         });
         if (!existingUser) throw new ServiceError(404, "No se encontró el usuario");
-        const [rowsUpdated] = await User.update(body, {
-            where: { id: idUser },
-        });
-        if (rowsUpdated === 0) throw new ServiceError(403, "No se encontró el usaurio para actualizar");
-        const updatedUser = await User.findByPk(idUser);
-        if (!updatedUser) throw new ServiceError(404, "No se encontró el usuario para actualizar");
-        return updatedUser;
+        if (existingUser && body.logo) {
+            existingUser.logo = body.logo;
+            await existingUser.save();
+        }
+        return existingUser;
     } catch (error) {
         throw error;
     }
@@ -165,19 +163,43 @@ export const patchLogoUserData = async (idUser: string, body: Partial<IUser>): P
 //ELIMINAR LA IMAGEN DE PERFIL DEL USER
 export const patchDeleteLogoUserData = async (userId: string) => {
     try {
+        // Buscar el usuario por su ID
+        const updateClient = await User.findByPk(userId);
+        if (!updateClient) throw new Error("No se encontró el usuario para actualizar su logo");
+
+        // Guardar la URL del logo antes de actualizar
+        const logoUrl = updateClient.logo;
+
+        // Actualizar la propiedad logo a una cadena vacía y guardar los cambios
+        updateClient.logo = '';
+        await updateClient.save();
+
+        // Configurar Cloudinary (debería estar configurado en un lugar central)
+        cloudinary.config({
+            cloud_name: process.env.CLOUDINARY_NAME,
+            api_key: process.env.CLOUDINARY_API_KEY,
+            api_secret: process.env.CLOUDINARY_API_SECRET
+        });
+
+        // Eliminar la imagen de Cloudinary si la URL del logo existía
+        if (logoUrl) {
+            const publicId = extractPublicIdFromUrlCloudinaryProfiles(logoUrl);
+            await cloudinary.uploader.destroy(publicId);
+        }
+
+        // Volver a buscar el usuario actualizado (opcional, dependiendo de cómo se quiera manejar el flujo)
         const existingUser = await User.findOne({
             where: { id: userId }
         });
         if (!existingUser) throw new ServiceError(404, "No se encontró el usuario");
-        if (existingUser) {
-            existingUser.logo = '';
-            await existingUser.save();
-        }
+
+        // Retornar el usuario actualizado
         return existingUser;
     } catch (error) {
         throw error;
     }
 };
+
 
 
 

@@ -48,7 +48,6 @@ export const postManyAssetData = async (body: IAssets, userId: string, typeRole:
         await t.commit();
         return newAsset;
     } catch (error) {
-        console.log('Error: ', error)
         await t.rollback();
         throw error;
     }

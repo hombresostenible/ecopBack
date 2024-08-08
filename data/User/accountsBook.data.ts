@@ -129,7 +129,6 @@ export const postAccountsBookData = async (body: IAccountsBook, userId: string):
 
         return newTransaction;
     } catch (error) {
-        console.log('Error: ', error)
         throw error;
     }
 };
@@ -179,8 +178,6 @@ export const getAccountsBooksApprovedByBranchData = async (idBranch: string): Pr
                 ['transactionDate', 'DESC'] // Aquí se especifica el campo y el orden
             ]
         });
-        console.log('idBranch: ', idBranch)
-        console.log('allAccountsBook: ', allAccountsBook)
         return allAccountsBook;
     } catch (error) {
         throw error;
